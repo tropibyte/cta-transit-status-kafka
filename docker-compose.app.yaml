@@ -1,0 +1,36 @@
+#
+# Runs the project's own Python code in a Python 3.7 container alongside the Kafka stack
+# defined in docker-compose.yaml. Merge the two files:
+#
+#   docker compose -f docker-compose.yaml -f docker-compose.app.yaml up -d
+#
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cta-transit:py37
+    working_dir: /app
+    volumes:
+    - .:/app
+    ports:
+    # The Tornado transit status page.
+    - "8888:8888"
+    environment:
+      # Inside the compose network the broker must be reached on its INTERNAL listener:
+      # the EXTERNAL one on 9092 advertises 127.0.0.1, which would loop back to this
+      # container instead of to Kafka.
+      BROKER_URL: "PLAINTEXT://kafka0:19092"
+      FAUST_BROKER_URL: "kafka://kafka0:19092"
+      SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      REST_PROXY_URL: "http://rest-proxy:8082"
+      KAFKA_CONNECT_URL: "http://connect:8083/connectors"
+      KSQL_URL: "http://ksql:8088"
+    depends_on:
+    - "kafka0"
+    - "schema-registry"
+    - "rest-proxy"
+    - "connect"
+    - "ksql"

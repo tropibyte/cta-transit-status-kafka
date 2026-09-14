@@ -1,0 +1,4 @@
+# This project runs inside Linux containers; keep LF in the repository regardless of the
+# platform it is edited on.
+* text=auto eol=lf
+*.png binary
