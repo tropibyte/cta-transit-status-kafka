@@ -42,6 +42,18 @@ the KSQL table count batches instead of people.
 train's first arrival, when the simulation has no previous station to report. Declaring them
 as plain `int`/`string` makes the Avro serializer throw on the first event of every run.
 
+**Faust emits every station id, including the 19 on no simulated line.** The CTA table holds
+111 distinct station ids; only 92 carry a red, blue or green flag. The other 19 (Brown, Purple
+and Pink stops such as Kimball, Southport, Sedgwick and Merchandise Mart) are emitted with an
+empty `line` rather than skipped, so that every station id present in the input topic is also
+represented in the output topic. Dropping them left the output topic at 92 of 111 -- verified
+by consuming the topic and counting distinct ids -- which fails the criterion asking that
+"every station ID is represented".
+
+They cost nothing downstream: `consumers/models/lines.py` routes on the line colour and
+discards anything that is not red, blue or green, so those records never reach the UI, which
+still renders exactly the 94 rows belonging to the three simulated lines.
+
 **Kafka Connect uses JSON on both key and value, with `schemas.enable` off.** Faust consumes
 `org.chicago.cta.stations` downstream and cannot decode Confluent-framed Avro without extra
 work. Note this means no `stations` schema is registered in Schema Registry — the two are

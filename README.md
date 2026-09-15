@@ -1,5 +1,15 @@
 # Public Transit Status with Apache Kafka
 
+> **Implementation notes: [NOTES.md](NOTES.md).**
+>
+> Worth reading before verifying this submission from the CLI. It covers the topic naming
+> convention, why all six topics are created explicitly rather than by broker auto-create,
+> and three places where this implementation deliberately departs from the directions:
+> the KSQL image the starter names no longer exists on Docker Hub, `TURNSTILE_SUMMARY`
+> aggregates a stream because aggregating the table silently drops ~70% of entries, and
+> Kafka Connect uses JSON converters (which means no `stations` schema in Schema Registry
+> -- the two halves of that criterion are mutually exclusive).
+
 In this project, you will construct a streaming event pipeline around Apache Kafka and its ecosystem. Using public data from the [Chicago Transit Authority](https://www.transitchicago.com/data/) we will construct an event pipeline around Kafka that allows us to simulate and display the status of train lines in real time.
 
 When the project is complete, you will be able to monitor a website to watch trains move from station to station.

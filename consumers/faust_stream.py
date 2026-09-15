@@ -66,11 +66,15 @@ async def transform_stations(stations):
         elif station.green is True:
             line = "green"
         else:
-            # A handful of CTA stops belong to none of the three lines we simulate.
-            logger.debug(
-                "station %s is not on a simulated line, skipping", station.station_name
-            )
-            continue
+            # 19 of the 111 station ids belong to none of the three simulated lines (Brown,
+            # Purple, Pink and so on). They are still emitted, with an empty line, so that
+            # every station id present in the input topic is represented in the output --
+            # skipping them would leave the output topic incomplete.
+            #
+            # Nothing downstream is disturbed: `consumers/models/lines.py` routes on the
+            # line colour and discards anything that is not red, blue or green, so these
+            # records never reach the UI.
+            line = ""
 
         table[station.station_id] = TransformedStation(
             station_id=station.station_id,
