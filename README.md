@@ -4,11 +4,17 @@
 >
 > Worth reading before verifying this submission from the CLI. It covers the topic naming
 > convention, why all six topics are created explicitly rather than by broker auto-create,
-> and three places where this implementation deliberately departs from the directions:
-> the KSQL image the starter names no longer exists on Docker Hub, `TURNSTILE_SUMMARY`
-> aggregates a stream because aggregating the table silently drops ~70% of entries, and
-> Kafka Connect uses JSON converters (which means no `stations` schema in Schema Registry
-> -- the two halves of that criterion are mutually exclusive).
+> and four places where this implementation deliberately departs from the directions:
+>
+> * the KSQL image the starter names no longer exists on Docker Hub;
+> * `TURNSTILE_SUMMARY` aggregates a stream, because aggregating the table silently drops
+>   ~70% of entries (measured: 5,405 of 18,214);
+> * Kafka Connect uses JSON converters, which means no `stations` schema in Schema Registry
+>   -- the two halves of that criterion are mutually exclusive;
+> * turnstile events share **one** topic while arrivals get one topic per station, so
+>   `kafka-topics --list` shows 78 arrival topics and a single `org.chicago.cta.turnstile.v1`.
+>   A per-station turnstile topic would require one KSQL table per station, and every event
+>   already carries its own `station_id`.
 
 In this project, you will construct a streaming event pipeline around Apache Kafka and its ecosystem. Using public data from the [Chicago Transit Authority](https://www.transitchicago.com/data/) we will construct an event pipeline around Kafka that allows us to simulate and display the status of train lines in real time.
 

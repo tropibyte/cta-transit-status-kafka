@@ -51,8 +51,13 @@ by consuming the topic and counting distinct ids -- which fails the criterion as
 "every station ID is represented".
 
 They cost nothing downstream: `consumers/models/lines.py` routes on the line colour and
-discards anything that is not red, blue or green, so those records never reach the UI, which
-still renders exactly the 94 rows belonging to the three simulated lines.
+discards anything that is not red, blue or green, so those records never reach the UI.
+
+The UI row count is unchanged at 94. Note that 94 rows is not the same number as 92 station
+ids, and both are correct: two station ids sit on two lines at once -- 40380 Clark/Lake on
+blue and green, 41400 Roosevelt on red and green. Each has separate stop rows carrying
+different line flags, so Faust emits it once per line, it lands in two `Line` objects, and the
+page lists it under both. 92 distinct ids + 2 second appearances = 94 rows.
 
 **Kafka Connect uses JSON on both key and value, with `schemas.enable` off.** Faust consumes
 `org.chicago.cta.stations` downstream and cannot decode Confluent-framed Avro without extra
